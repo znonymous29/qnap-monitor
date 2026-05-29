@@ -64,6 +64,8 @@ type volumeView struct {
 
 type alertState struct {
 	InAlert              bool        `json:"inAlert"`
+	SysAlert             bool        `json:"sysAlert"`
+	CPUAlert             bool        `json:"cpuAlert"`
 	Threshold            float64     `json:"threshold"`
 	DiskTempThreshold    float64     `json:"diskTempThreshold"`
 	CPUTempThreshold     float64     `json:"cpuTempThreshold"`
@@ -141,8 +143,10 @@ func (s *Server) handleStatusCurrent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	inAlert, threshold, diskTempThreshold, cpuTempThreshold, _ := s.Alerts.State()
+	inAlert, threshold, diskTempThreshold, cpuTempThreshold, _, sysAlert, cpuAlert := s.Alerts.State()
 	resp.Alert.InAlert = inAlert
+	resp.Alert.SysAlert = sysAlert
+	resp.Alert.CPUAlert = cpuAlert
 	resp.Alert.Threshold = threshold
 	resp.Alert.DiskTempThreshold = diskTempThreshold
 	resp.Alert.CPUTempThreshold = cpuTempThreshold

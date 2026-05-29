@@ -67,6 +67,8 @@ export interface StatusResp {
   volumes?: VolumeInfo[]
   alert: {
     inAlert: boolean
+    sysAlert: boolean
+    cpuAlert: boolean
     threshold: number
     diskTempThreshold: number
     cpuTempThreshold: number

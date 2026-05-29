@@ -115,10 +115,10 @@ func (m *Manager) UpdateConfig(threshold, diskTempThreshold, cpuTempThreshold fl
 	m.mu.Unlock()
 }
 
-func (m *Manager) State() (inAlert bool, threshold float64, diskTempThreshold float64, cpuTempThreshold float64, lastEvent *Event) {
+func (m *Manager) State() (inAlert bool, threshold float64, diskTempThreshold float64, cpuTempThreshold float64, lastEvent *Event, sysAlert bool, cpuAlert bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.sysAlertID != 0 || m.cpuAlertID != 0, m.threshold, m.diskTempThreshold, m.cpuTempThreshold, m.lastEvent
+	return m.sysAlertID != 0 || m.cpuAlertID != 0, m.threshold, m.diskTempThreshold, m.cpuTempThreshold, m.lastEvent, m.sysAlertID != 0, m.cpuAlertID != 0
 }
 
 func (m *Manager) ConsumeLastEvent() *Event {

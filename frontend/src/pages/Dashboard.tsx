@@ -55,10 +55,13 @@ export default function Dashboard() {
   useEffect(() => {
     if (data?.alert.event) {
       const e = data.alert.event
-      const msg =
-        e.type === 'temperature_high'
-          ? `温度超过阈值！当前 ${e.value.toFixed(1)}°C（阈值 ${e.threshold}°C）`
-          : `温度已恢复正常（当前 ${e.value.toFixed(1)}°C）`
+      const typeLabels: Record<string, string> = {
+        temperature_high: '系统温度',
+        cpu_temperature_high: 'CPU 温度',
+        disk_temperature_high: '硬盘温度',
+      }
+      const label = typeLabels[e.type] ?? '温度'
+      const msg = `${label}超过阈值！当前 ${e.value.toFixed(1)}°C（阈值 ${e.threshold}°C）`
       setToast(msg)
       const t = setTimeout(() => setToast(null), 6000)
       return () => clearTimeout(t)
@@ -109,8 +112,12 @@ export default function Dashboard() {
     <div className="space-y-6">
       <AlertBanner
         inAlert={data.alert.inAlert}
+        sysAlert={data.alert.sysAlert}
+        cpuAlert={data.alert.cpuAlert}
         threshold={data.alert.threshold}
+        cpuTempThreshold={data.alert.cpuTempThreshold}
         currentTemp={m?.sysTempC}
+        cpuTemp={m?.cpuTempC}
         diskHealthAlerts={data.alert.diskHealthAlerts}
       />
       {data.lastError && (
@@ -166,7 +173,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-slate-800 mb-3">存储</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {storageEntries.map(({ volume, disk }) => (
-              <StorageCard key={volume.volNo} volume={volume} disk={disk} threshold={data.alert.threshold} />
+              <StorageCard key={volume.volNo} volume={volume} disk={disk} threshold={data.alert.threshold} diskTempThreshold={data.alert.diskTempThreshold} />
             ))}
           </div>
         </section>
@@ -178,7 +185,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-slate-800 mb-3">未分配硬盘</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {orphanDisks.map((d) => (
-              <DiskOnlyCard key={d.hdNo} d={d} threshold={data.alert.threshold} />
+              <DiskOnlyCard key={d.hdNo} d={d} threshold={data.alert.threshold} diskTempThreshold={data.alert.diskTempThreshold} />
             ))}
           </div>
         </section>
@@ -193,14 +200,15 @@ export default function Dashboard() {
   )
 }
 
-function StorageCard({ volume, disk, threshold }: { volume: VolumeInfo; disk?: DiskInfo; threshold: number }) {
+function StorageCard({ volume, disk, threshold, diskTempThreshold }: { volume: VolumeInfo; disk?: DiskInfo; threshold: number; diskTempThreshold: number }) {
   const usedColor = volume.usedPct > 90 ? 'bg-red-500' : volume.usedPct > 75 ? 'bg-amber-500' : 'bg-blue-500'
   const tempTone = disk
-    ? disk.tempC > threshold ? 'text-red-600' : disk.tempC > threshold - 5 ? 'text-amber-600' : 'text-slate-700'
+    ? disk.tempC > diskTempThreshold ? 'text-red-600' : disk.tempC > diskTempThreshold - 5 ? 'text-amber-600' : 'text-slate-700'
     : ''
+  const diskOverThreshold = disk && disk.tempC > diskTempThreshold
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className={`rounded-lg border bg-white p-5 shadow-sm ${diskOverThreshold ? 'border-red-500' : 'border-slate-200'}`}>
       {/* Header: volume label + disk type badge */}
       <div className="flex items-center justify-between mb-1">
         <div className="font-semibold text-slate-800">{volume.label}</div>
@@ -271,10 +279,11 @@ function StorageCard({ volume, disk, threshold }: { volume: VolumeInfo; disk?: D
   )
 }
 
-function DiskOnlyCard({ d, threshold }: { d: DiskInfo; threshold: number }) {
-  const tempTone = d.tempC > threshold ? 'text-red-600' : d.tempC > threshold - 5 ? 'text-amber-600' : 'text-slate-900'
+function DiskOnlyCard({ d, threshold, diskTempThreshold }: { d: DiskInfo; threshold: number; diskTempThreshold: number }) {
+  const tempTone = d.tempC > diskTempThreshold ? 'text-red-600' : d.tempC > diskTempThreshold - 5 ? 'text-amber-600' : 'text-slate-900'
+  const diskOverThreshold = d.tempC > diskTempThreshold
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+    <div className={`rounded-lg border bg-white p-4 shadow-sm ${diskOverThreshold ? 'border-red-500' : 'border-slate-200'}`}>
       <div className="flex items-center justify-between mb-1">
         <div className="font-medium text-slate-800 text-sm">{d.alias}</div>
         <span className={`text-xs px-1.5 py-0.5 rounded ${d.isSsd ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>

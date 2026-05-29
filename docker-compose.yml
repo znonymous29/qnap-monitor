@@ -9,6 +9,7 @@ services:
     network_mode: host
     environment:
       - ADDR=:8050
+      - TZ=Asia/Shanghai
     volumes:
       - ./data:/data
     restart: unless-stopped
