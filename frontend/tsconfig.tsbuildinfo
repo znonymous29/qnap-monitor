@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/api/client.ts","./src/components/AlertBanner.tsx","./src/components/MetricCard.tsx","./src/components/MetricChart.tsx","./src/pages/Alerts.tsx","./src/pages/Dashboard.tsx","./src/pages/History.tsx","./src/pages/Settings.tsx","./src/pages/Storage.tsx"],"version":"5.9.3"}

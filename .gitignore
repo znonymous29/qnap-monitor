@@ -1,0 +1,10 @@
+data/
+node_modules/
+dist/
+backend/cmd/server/web/*
+!backend/cmd/server/web/.gitkeep
+*.db
+*.db-wal
+*.db-shm
+key.bin
+.DS_Store

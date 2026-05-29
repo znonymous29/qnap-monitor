@@ -1,0 +1,14 @@
+services:
+  qnap-monitor:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: qnap-monitor
+    # host network mode: container shares the host's Tailscale interface,
+    # so it can reach the QNAP at its Tailscale IP (100.98.48.37).
+    network_mode: host
+    environment:
+      - ADDR=:8050
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
